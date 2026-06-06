@@ -2,7 +2,9 @@
 
 Demo project for the [Glade.ai](https://www.glade.ai) Software Engineer application.
 
-**Live demo:** _(add Vercel URL after deploy)_
+**Live demo:** https://bankruptcy-intake-triage.vercel.app
+
+**Repository:** https://github.com/sondo-amoeba/bankruptcy-intake-triage
 
 ## Problem
 

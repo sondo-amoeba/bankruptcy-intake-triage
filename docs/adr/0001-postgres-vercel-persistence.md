@@ -8,4 +8,4 @@ v1 adds durable triage cases, approval records, and export attempts. We use **Ve
 
 **Considered:** SQLite/Turso (lighter but weaker JD signal); Supabase (similar, extra vendor narrative); session-only persistence (too thin for balanced v1 scope).
 
-**Consequences:** Requires `DATABASE_URL` on Vercel and local `.env.local`. Migrations become part of the deploy path. Swapping databases later is a meaningful refactor — acceptable for a demo with a bounded schema.
+**Consequences:** Requires `POSTGRES_URL` (or `DATABASE_URL`) on Vercel and local `.env.local`. Schema push runs on Vercel build when a connection string is present. Swapping databases later is a meaningful refactor — acceptable for a demo with a bounded schema.

@@ -19,7 +19,7 @@ Bankruptcy firms lose time when intake notes are incomplete or inconsistent befo
 - **Idempotent approve & export** — safe double-submit; export history panel
 - **Stub practice-management export** — sync ID + case packet from approval snapshot
 
-See [docs/adr/](./docs/adr/) for architecture decisions.
+See [docs/adr/](./docs/adr/) for architecture decision records (Postgres persistence, approval snapshots, idempotent export, and planned v2 edit audit).
 
 ## Architecture
 

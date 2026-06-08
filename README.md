@@ -8,42 +8,70 @@ Demo project for the [Glade.ai](https://www.glade.ai) Software Engineer applicat
 
 ## Problem
 
-Bankruptcy firms lose time when intake notes are incomplete or inconsistent before petition prep. Paralegals need structured facts, blocking gaps flagged early, and a human approval step before downstream workflows.
+Bankruptcy firms lose time when intake notes are incomplete or inconsistent before petition prep. Paralegals need structured facts, blocking gaps flagged early, a human approval gate, and a handoff to downstream systems.
 
-## What I built
+## What I built (v1)
 
-Single-page app: paste intake notes (or load a sample) → server-side LLM extraction → Zod validation → deterministic rule engine → editable review → Approve → disposition banner.
+- **Case queue** (`/`) — recent intakes with status
+- **Triage workspace** (`/cases/[id]`) — analyze → edit → approve → export
+- **PostgreSQL** — cases, immutable approval records, export attempts
+- **Hybrid AI** — Gemini extraction + deterministic rules (`lib/rules.ts`)
+- **Idempotent approve & export** — safe double-submit; export history panel
+- **Stub practice-management export** — sync ID + case packet from approval snapshot
+
+See [docs/adr/](./docs/adr/) for architecture decisions.
 
 ## Architecture
 
 ```
-React UI (app/page.tsx)
-  → POST /api/triage
-  → Google Gemini (custom paste) OR canned sample
-  → Zod schema validation
-  → lib/rules.ts (blocking vs follow-up, disposition)
-  → UI edit + client-side rule recompute
-  → Approve
+/  case queue
+/cases/[id]  workspace
+  → POST /api/cases/[id]/analyze   (Gemini or sample)
+  → PATCH /api/cases/[id]          (edit extraction)
+  → POST /api/cases/[id]/approve   (immutable snapshot)
+  → POST /api/cases/[id]/export    (idempotent stub handoff)
+       ↓
+  PostgreSQL (Vercel Postgres / Neon)
+  triage_cases | approval_records | export_attempts
 ```
 
-**Hybrid pattern:** LLM extracts facts; code enforces compliance-style missing-field rules (tested separately with Vitest).
+Legacy v0 endpoint `POST /api/triage` remains for reference; the UI uses the case API.
+
+## Versioning
+
+| Version | Summary |
+|---------|---------|
+| v0 | Single-page, no persistence (superseded) |
+| **v1** | Current — Postgres, queue, audit, export |
+| v2 | Planned — field-level edit audit trail |
 
 ## Tradeoffs and v1 cuts
 
-- No PDF upload, CRM sync, PostgreSQL, auth, or multi-case queue
-- Sample intakes work without `GEMINI_API_KEY`
-- Custom paste requires a free [Google AI Studio](https://aistudio.google.com/apikey) key on Vercel
+- No auth, multi-tenant firms, or real PM OAuth/webhooks
+- No PDF upload, CRM sync, or petition drafting
+- Field-level edit history → v2
 - Rules are simplified for demo — not legal advice
 
 ## Local setup
 
 ```bash
 npm install
-cp .env.example .env.local   # optional for custom paste
+cp .env.example .env.local
+```
+
+Required in `.env.local`:
+
+- `DATABASE_URL` — [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) or [Neon](https://neon.tech) connection string
+- `GEMINI_API_KEY` — optional for custom paste; [Google AI Studio](https://aistudio.google.com/apikey) (samples work without)
+
+```bash
+npm run db:push    # apply schema
 npm run dev
 ```
 
 Open http://localhost:3000
+
+Optional: `EXPORT_SIMULATE_FAILURE=true` — first export attempt fails, retry succeeds (demo integration fault tolerance).
 
 ## Sample scenarios
 
@@ -53,17 +81,22 @@ Open http://localhost:3000
 | James R. | Needs follow-up |
 | Maria L. | Needs attorney review |
 
+Start from **Start from sample…** on the case queue.
+
 ## Scripts
 
 ```bash
-npm test    # rule engine unit tests
+npm test           # rules + export idempotency helpers
 npm run build
+npm run db:push    # Drizzle → Postgres
 ```
 
 ## Deploy (Vercel)
 
 ```bash
+vercel env add DATABASE_URL
 vercel env add GEMINI_API_KEY
+npm run db:push    # against production DATABASE_URL
 vercel --prod
 ```
 

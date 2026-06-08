@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { buildUserPrompt, TRIAGE_SYSTEM_PROMPT } from "./prompt";
 import { triageExtractionSchema, type TriageExtraction } from "./schema";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 function getGeminiApiKey(): string | undefined {
   return process.env.GEMINI_API_KEY?.trim() || undefined;

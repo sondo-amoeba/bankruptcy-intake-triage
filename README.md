@@ -19,7 +19,7 @@ Single-page app: paste intake notes (or load a sample) → server-side LLM extra
 ```
 React UI (app/page.tsx)
   → POST /api/triage
-  → OpenAI (custom paste) OR canned sample
+  → Google Gemini (custom paste) OR canned sample
   → Zod schema validation
   → lib/rules.ts (blocking vs follow-up, disposition)
   → UI edit + client-side rule recompute
@@ -31,8 +31,8 @@ React UI (app/page.tsx)
 ## Tradeoffs and v1 cuts
 
 - No PDF upload, CRM sync, PostgreSQL, auth, or multi-case queue
-- Sample intakes work without `OPENAI_API_KEY`
-- Custom paste requires server-side API key on Vercel
+- Sample intakes work without `GEMINI_API_KEY`
+- Custom paste requires a free [Google AI Studio](https://aistudio.google.com/apikey) key on Vercel
 - Rules are simplified for demo — not legal advice
 
 ## Local setup
@@ -63,8 +63,7 @@ npm run build
 ## Deploy (Vercel)
 
 ```bash
-vercel link
-vercel env add OPENAI_API_KEY
+vercel env add GEMINI_API_KEY
 vercel --prod
 ```
 

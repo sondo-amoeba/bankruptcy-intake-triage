@@ -61,7 +61,7 @@ cp .env.example .env.local
 
 Required in `.env.local`:
 
-- `DATABASE_URL` — [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) or [Neon](https://neon.tech) connection string
+- `POSTGRES_URL` — set automatically when [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) Storage is linked (`DATABASE_URL` also works)
 - `GEMINI_API_KEY` — optional for custom paste; [Google AI Studio](https://aistudio.google.com/apikey) (samples work without)
 
 ```bash
@@ -94,9 +94,8 @@ npm run db:push    # Drizzle → Postgres
 ## Deploy (Vercel)
 
 ```bash
-vercel env add DATABASE_URL
-vercel env add GEMINI_API_KEY
-npm run db:push    # against production DATABASE_URL
+vercel env pull .env.local   # includes POSTGRES_URL from Vercel Storage
+npm run db:push
 vercel --prod
 ```
 
